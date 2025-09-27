@@ -41,7 +41,7 @@ export async function getCurrentLocation(): Promise<LocationData> {
             lng: longitude,
             address
           });
-        } catch (error) {
+        } catch (_error) {
           // If reverse geocoding fails, still return coordinates
           resolve({
             lat: latitude,
@@ -138,7 +138,7 @@ export async function requestLocationPermission(): Promise<LocationData> {
     
     // Get the actual location
     return await getCurrentLocation();
-  } catch (error) {
+  } catch (_error) {
     // If permission query fails, try direct geolocation
     return await getCurrentLocation();
   }

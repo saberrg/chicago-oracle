@@ -70,7 +70,7 @@ function parseExifData(arrayBuffer: ArrayBuffer): ExifData {
  * Parse GPS data from EXIF
  * This is a simplified implementation
  */
-function parseGpsData(dataView: DataView, offset: number): LocationData | null {
+function parseGpsData(_dataView: DataView, _offset: number): LocationData | null {
   try {
     // This is a simplified GPS parsing
     // In a real implementation, you'd need to parse the full EXIF structure

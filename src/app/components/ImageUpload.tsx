@@ -131,7 +131,7 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
         };
         reader.readAsDataURL(processed);
         
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Failed to process image:', error);
         onUploadError?.('Failed to process image. Please try a different image.');
         return;
@@ -142,7 +142,7 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
         setLocationLoading(true);
         const fileLocation = await getLocationFromFile(selectedFile, getCurrentLocation);
         setLocation(fileLocation);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.warn('Failed to get location:', error);
         // Don't show error to user, just log it
       } finally {
@@ -156,9 +156,10 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
     try {
       const currentLocation = await getCurrentLocation();
       setLocation(currentLocation);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Location error:', error);
-      onUploadError?.(error.message || 'Failed to get location');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to get location';
+      onUploadError?.(errorMessage);
     } finally {
       setLocationLoading(false);
     }
@@ -193,9 +194,10 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
       }
       
       onUploadSuccess?.();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Upload error:', error);
-      onUploadError?.(error.message || 'Failed to upload image');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload image';
+      onUploadError?.(errorMessage);
     } finally {
       setLoading(false);
     }

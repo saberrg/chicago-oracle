@@ -2,9 +2,7 @@ import {
   ref, 
   uploadBytes, 
   getDownloadURL, 
-  deleteObject,
-  listAll,
-  getMetadata
+  deleteObject
 } from 'firebase/storage';
 import { 
   collection, 

@@ -25,8 +25,9 @@ export default function LoginForm({ onLoginSuccess, onLoginError }: LoginFormPro
     try {
       await signIn(email, password);
       onLoginSuccess?.();
-    } catch (error: any) {
-      onLoginError?.(error.message || 'Login failed');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      onLoginError?.(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -18,7 +18,7 @@ interface ImageUploadProps {
 }
 
 export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUploadProps) {
-  const [file, setFile] = useState<File | null>(null);
+  const [, setFile] = useState<File | null>(null);
   const [processedFile, setProcessedFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState<LocationData | null>(null);

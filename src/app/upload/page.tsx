@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { onAuthStateChange, getCurrentUser, signOutUser } from '@/lib/authService';
+import { onAuthStateChange, signOutUser } from '@/lib/authService';
 import LoginForm from '@/app/components/LoginForm';
 import ImageUpload from '@/app/components/ImageUpload';
 import ImageList from '@/app/components/ImageList';
@@ -49,7 +49,7 @@ export default function UploadPage() {
       await signOutUser();
       setSuccess('Successfully signed out!');
       setTimeout(() => setSuccess(null), 3000);
-    } catch (error: any) {
+    } catch (_error) {
       setError('Failed to sign out');
     }
   };

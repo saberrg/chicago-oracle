@@ -25,7 +25,7 @@ export default function ImageList({ onUpdate }: ImageListProps) {
       setError(null);
       const result = await getImages(50); // Get up to 50 images
       setImages(result.images);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError('Failed to load images');
       console.error('Error loading images:', err);
     } finally {
@@ -55,7 +55,7 @@ export default function ImageList({ onUpdate }: ImageListProps) {
       setEditTitle('');
       await loadImages(); // Reload to get updated data
       onUpdate?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError('Failed to update image title');
       console.error('Error updating image:', err);
     }
@@ -70,7 +70,7 @@ export default function ImageList({ onUpdate }: ImageListProps) {
       await deleteImage(imageId);
       await loadImages(); // Reload to reflect deletion
       onUpdate?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError('Failed to delete image');
       console.error('Error deleting image:', err);
     }

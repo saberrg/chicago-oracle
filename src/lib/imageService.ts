@@ -8,6 +8,7 @@ import {
   collection, 
   addDoc, 
   getDocs, 
+  getDoc,
   doc, 
   deleteDoc, 
   updateDoc,
@@ -123,22 +124,21 @@ export async function getImages(
 export async function getImageById(id: string): Promise<ImageData | null> {
   try {
     const docRef = doc(db, IMAGES_COLLECTION, id);
-    const docSnap = await getDocs(query(collection(db, IMAGES_COLLECTION), limit(1)));
+    const docSnap = await getDoc(docRef);
     
-    if (docSnap.empty) {
+    if (!docSnap.exists()) {
       return null;
     }
     
-    const data = docSnap.docs[0].data();
+    const data = docSnap.data();
     return {
-      id: docSnap.docs[0].id,
+      id: docSnap.id,
       src: data.src,
       alt: data.alt || '',
       title: data.title,
       createdAt: data.createdAt.toDate(),
       updatedAt: data.updatedAt.toDate(),
       uploadedBy: data.uploadedBy,
-      tags: data.tags || [],
       location: data.location
     };
   } catch (error) {

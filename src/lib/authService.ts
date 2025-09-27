@@ -13,9 +13,10 @@ export async function signIn(email: string, password: string): Promise<User> {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential.user;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Sign in error:', error);
-    throw new Error(getAuthErrorMessage(error.code));
+    const errorCode = error instanceof Error && 'code' in error ? (error as { code: string }).code : 'unknown';
+    throw new Error(getAuthErrorMessage(errorCode));
   }
 }
 
@@ -25,7 +26,7 @@ export async function signIn(email: string, password: string): Promise<User> {
 export async function signOutUser(): Promise<void> {
   try {
     await signOut(auth);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Sign out error:', error);
     throw new Error('Failed to sign out');
   }

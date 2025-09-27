@@ -5,6 +5,7 @@ import NextImage from "next/image";
 import ImageCard from './components/ImageCard';
 import { getImages } from '@/lib/imageService';
 import { ImageData } from '@/types/image';
+import { DocumentSnapshot } from 'firebase/firestore';
 
 // Mock image data - fallback when no real images are available
 const mockImages: ImageData[] = [
@@ -41,7 +42,7 @@ export default function Home() {
   const [images, setImages] = useState<ImageData[]>([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [lastDoc, setLastDoc] = useState<any>(null);
+  const [lastDoc, setLastDoc] = useState<DocumentSnapshot | undefined>(undefined);
   const [hasMore, setHasMore] = useState(true);
   const loaderRef = useRef<HTMLDivElement>(null);
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import NextImage from "next/image";
 import dynamic from 'next/dynamic';
 import { ImageData } from '@/types/image';

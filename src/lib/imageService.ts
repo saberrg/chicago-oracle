@@ -158,10 +158,17 @@ export async function deleteImage(id: string): Promise<void> {
       throw new Error('Image not found');
     }
     
-    // Extract the full path from URL (already includes the images/ folder)
+    // Extract the storage path from the Firebase Storage URL
+    // Firebase Storage URLs have format: https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{path}?{params}
     const url = new URL(imageData.src);
-    // The pathname includes the full storage path, we just need to decode it
-    const fullPath = decodeURIComponent(url.pathname.substring(1)); // Remove leading slash and decode
+    const pathMatch = url.pathname.match(/\/v0\/b\/[^\/]+\/o\/(.+)/);
+    
+    if (!pathMatch) {
+      throw new Error('Invalid Firebase Storage URL format');
+    }
+    
+    // Decode the path (Firebase Storage URLs are URL-encoded)
+    const fullPath = decodeURIComponent(pathMatch[1]);
     
     // Delete from Storage
     const storageRef = ref(storage, fullPath);

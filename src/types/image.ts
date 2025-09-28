@@ -1,3 +1,5 @@
+import { AddressComponents } from '@/lib/addressService';
+
 export interface ImageData {
   id: string;
   src: string;
@@ -11,6 +13,7 @@ export interface ImageData {
     lng: number;
     address?: string;
   };
+  enhancedAddress?: AddressComponents;
 }
 
 export interface UploadImageData {
@@ -22,4 +25,5 @@ export interface UploadImageData {
     lng: number;
     address?: string;
   };
+  enhancedAddress?: AddressComponents;
 }

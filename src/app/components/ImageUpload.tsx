@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { uploadImage } from '@/lib/imageService';
 import { getCurrentLocation, LocationData } from '@/lib/locationService';
 import { getLocationFromFile } from '@/lib/exifService';
+import { getEnhancedAddress } from '@/lib/addressService';
 import { UploadImageData } from '@/types/image';
 import { getCurrentUser } from '@/lib/authService';
 
@@ -22,6 +23,7 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
   const [processedFile, setProcessedFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState<LocationData | null>(null);
+  const [enhancedAddress, setEnhancedAddress] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
@@ -32,6 +34,21 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
     const user = getCurrentUser();
     setIsAuthenticated(!!user);
   }, []);
+
+  /**
+   * Get enhanced address data when location coordinates are available
+   */
+  const getEnhancedAddressData = async (lat: number, lng: number) => {
+    try {
+      const addressData = await getEnhancedAddress(lat, lng);
+      setEnhancedAddress(addressData);
+      return addressData;
+    } catch (error) {
+      console.warn('Failed to get enhanced address:', error);
+      setEnhancedAddress(null);
+      return null;
+    }
+  };
 
   /**
    * Process image to fit target aspect ratio (4:5)
@@ -142,6 +159,11 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
         setLocationLoading(true);
         const fileLocation = await getLocationFromFile(selectedFile, getCurrentLocation);
         setLocation(fileLocation);
+        
+        // Get enhanced address data if location was found
+        if (fileLocation.lat && fileLocation.lng) {
+          await getEnhancedAddressData(fileLocation.lat, fileLocation.lng);
+        }
       } catch (error: unknown) {
         console.warn('Failed to get location:', error);
         // Don't show error to user, just log it
@@ -156,6 +178,11 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
     try {
       const currentLocation = await getCurrentLocation();
       setLocation(currentLocation);
+      
+      // Get enhanced address data
+      if (currentLocation.lat && currentLocation.lng) {
+        await getEnhancedAddressData(currentLocation.lat, currentLocation.lng);
+      }
     } catch (error: unknown) {
       console.error('Location error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to get location';
@@ -178,7 +205,8 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
       const uploadData: UploadImageData = {
         file: processedFile,
         title,
-        location
+        location,
+        enhancedAddress
       };
 
       await uploadImage(uploadData);
@@ -188,6 +216,7 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
       setProcessedFile(null);
       setTitle('');
       setLocation(null);
+      setEnhancedAddress(null);
       setPreview(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -308,7 +337,10 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
               </div>
               <button
                 type="button"
-                onClick={() => setLocation(null)}
+                onClick={() => {
+                  setLocation(null);
+                  setEnhancedAddress(null);
+                }}
                 className="mt-2 text-xs text-green-600 hover:text-green-800 underline"
               >
                 Change Location

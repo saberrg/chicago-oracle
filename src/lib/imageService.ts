@@ -20,9 +20,39 @@ import {
 } from 'firebase/firestore';
 import { storage, db } from './firebase';
 import { ImageData, UploadImageData } from '@/types/image';
+import { getEnhancedAddress } from './addressService';
 
 const IMAGES_COLLECTION = 'images';
 const STORAGE_FOLDER = 'images';
+
+/**
+ * Migrate an image to include enhanced address data if missing
+ * This function will be called automatically when loading images without enhanced address
+ */
+export async function migrateImageEnhancedAddress(imageId: string, lat: number, lng: number): Promise<void> {
+  try {
+    console.log(`Migrating enhanced address for image ${imageId}`);
+    
+    // Get enhanced address data
+    const enhancedAddress = await getEnhancedAddress(lat, lng);
+    
+    if (enhancedAddress) {
+      // Update the image document with enhanced address data
+      const docRef = doc(db, IMAGES_COLLECTION, imageId);
+      await updateDoc(docRef, {
+        enhancedAddress,
+        updatedAt: new Date()
+      });
+      
+      console.log(`Successfully migrated enhanced address for image ${imageId}`);
+    } else {
+      console.warn(`Could not get enhanced address for image ${imageId}`);
+    }
+  } catch (error) {
+    console.error(`Failed to migrate enhanced address for image ${imageId}:`, error);
+    // Don't throw error to avoid breaking the user experience
+  }
+}
 
 /**
  * Upload an image to Firebase Storage and save metadata to Firestore
@@ -50,7 +80,8 @@ export async function uploadImage(imageData: UploadImageData): Promise<ImageData
       title: imageData.title,
       createdAt: new Date(),
       updatedAt: new Date(),
-      location: imageData.location
+      location: imageData.location,
+      enhancedAddress: imageData.enhancedAddress
     };
     
     // Save metadata to Firestore
@@ -95,7 +126,7 @@ export async function getImages(
     
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      images.push({
+      const imageData = {
         id: doc.id,
         src: data.src,
         alt: data.alt || '',
@@ -103,9 +134,18 @@ export async function getImages(
         createdAt: data.createdAt.toDate(),
         updatedAt: data.updatedAt.toDate(),
         uploadedBy: data.uploadedBy,
-        location: data.location
-      });
+        location: data.location,
+        enhancedAddress: data.enhancedAddress
+      };
+      
+      images.push(imageData);
       newLastDoc = doc;
+      
+      // Trigger migration for images without enhanced address data
+      if (!data.enhancedAddress && data.location?.lat && data.location?.lng) {
+        // Run migration in background - don't await to avoid blocking
+        migrateImageEnhancedAddress(doc.id, data.location.lat, data.location.lng);
+      }
     });
     
     return {
@@ -131,7 +171,7 @@ export async function getImageById(id: string): Promise<ImageData | null> {
     }
     
     const data = docSnap.data();
-    return {
+    const imageData = {
       id: docSnap.id,
       src: data.src,
       alt: data.alt || '',
@@ -139,8 +179,17 @@ export async function getImageById(id: string): Promise<ImageData | null> {
       createdAt: data.createdAt.toDate(),
       updatedAt: data.updatedAt.toDate(),
       uploadedBy: data.uploadedBy,
-      location: data.location
+      location: data.location,
+      enhancedAddress: data.enhancedAddress
     };
+    
+    // Trigger migration for images without enhanced address data
+    if (!data.enhancedAddress && data.location?.lat && data.location?.lng) {
+      // Run migration in background - don't await to avoid blocking
+      migrateImageEnhancedAddress(docSnap.id, data.location.lat, data.location.lng);
+    }
+    
+    return imageData;
   } catch (error) {
     console.error('Error getting image:', error);
     throw new Error('Failed to get image');
@@ -188,7 +237,7 @@ export async function deleteImage(id: string): Promise<void> {
  */
 export async function updateImageMetadata(
   id: string, 
-  updates: Partial<Pick<ImageData, 'title' | 'alt' | 'location'>>
+  updates: Partial<Pick<ImageData, 'title' | 'alt' | 'location' | 'enhancedAddress'>>
 ): Promise<void> {
   try {
     const docRef = doc(db, IMAGES_COLLECTION, id);
@@ -228,7 +277,7 @@ export async function getImagesByLocation(
         );
         
         if (distance <= radiusKm) {
-          images.push({
+          const imageData = {
             id: doc.id,
             src: data.src,
             alt: data.alt || '',
@@ -236,8 +285,17 @@ export async function getImagesByLocation(
             createdAt: data.createdAt.toDate(),
             updatedAt: data.updatedAt.toDate(),
             uploadedBy: data.uploadedBy,
-            location: data.location
-          });
+            location: data.location,
+            enhancedAddress: data.enhancedAddress
+          };
+          
+          images.push(imageData);
+          
+          // Trigger migration for images without enhanced address data
+          if (!data.enhancedAddress && data.location?.lat && data.location?.lng) {
+            // Run migration in background - don't await to avoid blocking
+            migrateImageEnhancedAddress(doc.id, data.location.lat, data.location.lng);
+          }
         }
       }
     });

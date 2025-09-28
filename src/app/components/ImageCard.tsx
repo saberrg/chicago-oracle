@@ -1,41 +1,26 @@
 import { ImageData } from '@/types/image';
 import ImageWithMap from './ImageWithMap';
-import { useState, useEffect } from 'react';
-import { getEnhancedAddress, getDescriptiveLocation, AddressComponents } from '@/lib/addressService';
+import { getDescriptiveLocation } from '@/lib/addressService';
 
 interface ImageCardProps {
   image: ImageData;
 }
 
 export default function ImageCard({ image }: ImageCardProps) {
-  const [enhancedAddress, setEnhancedAddress] = useState<AddressComponents | null>(null);
-  const [isLoadingAddress, setIsLoadingAddress] = useState(false);
-
-  // Console log the image object to see what data we have
+  // Use the stored enhanced address data directly from the image object
+  // If enhanced address is missing, the migration will be triggered automatically in the background
+  const displayAddress = getDescriptiveLocation(image.enhancedAddress || null, image.location.address);
+  
+  // Console log for debugging
   console.log('ImageCard - Full image object:', image);
   console.log('ImageCard - Location data:', image.location);
-  console.log('ImageCard - Address:', image.location.address);
-
-  useEffect(() => {
-    const fetchEnhancedAddress = async () => {
-      if (!image.location.lat || !image.location.lng) return;
-      
-      setIsLoadingAddress(true);
-      try {
-        const address = await getEnhancedAddress(image.location.lat, image.location.lng);
-        setEnhancedAddress(address);
-        console.log('Enhanced address result:', address);
-      } catch (error) {
-        console.error('Failed to get enhanced address:', error);
-      } finally {
-        setIsLoadingAddress(false);
-      }
-    };
-
-    fetchEnhancedAddress();
-  }, [image.location.lat, image.location.lng]);
-
-  const displayAddress = getDescriptiveLocation(enhancedAddress, image.location.address);
+  console.log('ImageCard - Enhanced address:', image.enhancedAddress);
+  console.log('ImageCard - Display address:', displayAddress);
+  
+  // Log if migration is needed (for debugging)
+  if (!image.enhancedAddress && image.location?.lat && image.location?.lng) {
+    console.log(`ImageCard - Migration needed for image ${image.id}, will be handled automatically`);
+  }
   
   return (
     <div className="mb-8">
@@ -54,7 +39,7 @@ export default function ImageCard({ image }: ImageCardProps) {
             <p 
               className="text-black text-lg sm:text-xl font-medium"
             >
-              {isLoadingAddress ? 'Loading location...' : displayAddress}
+              {displayAddress}
             </p>
           )}
           <p 

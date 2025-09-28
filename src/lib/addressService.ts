@@ -14,6 +14,27 @@ export interface AddressComponents {
   distanceFromStreet?: number | null; // in meters
 }
 
+interface NominatimAddress {
+  house_number?: string;
+  road?: string;
+  pedestrian?: string;
+  footway?: string;
+  neighbourhood?: string;
+  suburb?: string;
+  city?: string;
+  town?: string;
+  village?: string;
+  state?: string;
+  country?: string;
+  postcode?: string;
+}
+
+interface BigDataCloudResponse {
+  locality?: string;
+  principalSubdivision?: string;
+  countryName?: string;
+}
+
 export interface EnhancedLocationData {
   lat: number;
   lng: number;
@@ -118,7 +139,7 @@ async function getBigDataCloudAddress(lat: number, lng: number): Promise<Address
 /**
  * Format address from Nominatim response
  */
-function formatNominatimAddress(address: any): string {
+function formatNominatimAddress(address: NominatimAddress): string {
   const parts = [];
   
   // Try to build a street address first
@@ -154,7 +175,7 @@ function formatNominatimAddress(address: any): string {
 /**
  * Format address from BigDataCloud response
  */
-function formatBigDataCloudAddress(data: any): string {
+function formatBigDataCloudAddress(data: BigDataCloudResponse): string {
   const parts = [];
   if (data.locality) parts.push(data.locality);
   if (data.principalSubdivision) parts.push(data.principalSubdivision);
@@ -165,7 +186,7 @@ function formatBigDataCloudAddress(data: any): string {
 /**
  * Calculate approximate distance from nearest street (rough estimation)
  */
-function calculateDistanceFromStreet(lat: number, lng: number, address: any): number | null {
+function calculateDistanceFromStreet(lat: number, lng: number, address: NominatimAddress): number | null {
   // This is a simplified calculation - in a real app you might want to use
   // a more sophisticated approach with actual street data
   if (!address.road && !address.pedestrian && !address.footway) {

@@ -49,7 +49,7 @@ export default function UploadPage() {
       await signOutUser();
       setSuccess('Successfully signed out!');
       setTimeout(() => setSuccess(null), 3000);
-    } catch (_error) {
+    } catch {
       setError('Failed to sign out');
     }
   };

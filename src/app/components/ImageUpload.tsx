@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { uploadImage } from '@/lib/imageService';
 import { getCurrentLocation, LocationData } from '@/lib/locationService';
 import { getLocationFromFile } from '@/lib/exifService';
-import { getEnhancedAddress } from '@/lib/addressService';
+import { getEnhancedAddress, AddressComponents } from '@/lib/addressService';
 import { UploadImageData } from '@/types/image';
 import { getCurrentUser } from '@/lib/authService';
 
@@ -23,7 +24,7 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
   const [processedFile, setProcessedFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState<LocationData | null>(null);
-  const [enhancedAddress, setEnhancedAddress] = useState<any>(null);
+  const [enhancedAddress, setEnhancedAddress] = useState<AddressComponents | null>(null);
   const [loading, setLoading] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
@@ -58,7 +59,7 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
     return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const img = new Image();
+      const img = new window.Image();
 
       img.onload = () => {
         if (!ctx) {
@@ -206,7 +207,7 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
         file: processedFile,
         title,
         location,
-        enhancedAddress
+        enhancedAddress: enhancedAddress || undefined
       };
 
       await uploadImage(uploadData);
@@ -276,10 +277,11 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
               className="relative w-full rounded-md overflow-hidden border-2 border-[#17663d]"
               style={{ aspectRatio: '4/5' }}
             >
-              <img
+              <Image
                 src={preview}
                 alt="Preview"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
             <p className="text-xs text-gray-500 mt-1 text-center">

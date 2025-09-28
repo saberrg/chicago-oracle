@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Image from 'next/image';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Icon } from 'leaflet';
 import { useMap } from 'react-leaflet';
@@ -63,10 +64,12 @@ export default function MapComponent({ image }: MapComponentProps) {
           <Popup>
             <div className="text-center">
               <h3 className="font-semibold text-sm mb-2">{image.title}</h3>
-              <img 
+              <Image 
                 src={image.src} 
-                alt={image.alt}
-                className="w-20 h-20 object-cover rounded mx-auto"
+                alt={image.alt || 'Image'}
+                width={80}
+                height={80}
+                className="object-cover rounded mx-auto"
               />
               {image.location.address && (
                 <p className="text-xs text-gray-600 mt-2">{image.location.address}</p>

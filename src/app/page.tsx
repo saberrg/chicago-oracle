@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import NextImage from "next/image";
+import Image from "next/image";
 import ImageCard from './components/ImageCard';
 import { getImages } from '@/lib/imageService';
 import { ImageData } from '@/types/image';
@@ -143,7 +143,7 @@ export default function Home() {
         <div className="relative h-full flex items-center justify-between px-4 sm:px-16">
           {/* Logo */}
           <div className="flex items-center justify-center w-full">
-            <NextImage
+            <Image
               src="/chicago-oracle.svg"
               alt="Chicago Oracle"
               width={888}

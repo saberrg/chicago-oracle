@@ -180,6 +180,15 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-[#17663D] py-4">
+        <div className="flex justify-center">
+          <p className="text-white text-sm">
+            No Affiliation with Oracle Corporation
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

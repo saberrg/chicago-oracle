@@ -7,7 +7,7 @@ interface LogEntry {
   timestamp: Date;
   level: 'log' | 'warn' | 'error' | 'info';
   message: string;
-  data?: any;
+  data?: string;
 }
 
 export default function ConsoleLogDisplay() {
@@ -22,7 +22,7 @@ export default function ConsoleLogDisplay() {
     const originalInfo = console.info;
 
     // Override console methods to capture logs
-    const addLog = (level: LogEntry['level'], args: any[]) => {
+    const addLog = (level: LogEntry['level'], args: unknown[]) => {
       const message = args.map(arg => 
         typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
       ).join(' ');
@@ -32,7 +32,7 @@ export default function ConsoleLogDisplay() {
         timestamp: new Date(),
         level,
         message,
-        data: args.length > 1 ? args.slice(1) : undefined
+        data: args.length > 1 ? JSON.stringify(args.slice(1), null, 2) : undefined
       };
 
       setLogs(prev => [...prev.slice(-49), logEntry]); // Keep last 50 logs
@@ -71,14 +71,6 @@ export default function ConsoleLogDisplay() {
     setLogs([]);
   };
 
-  const getLevelColor = (level: LogEntry['level']) => {
-    switch (level) {
-      case 'error': return 'text-red-600 bg-red-50';
-      case 'warn': return 'text-yellow-600 bg-yellow-50';
-      case 'info': return 'text-blue-600 bg-blue-50';
-      default: return 'text-gray-600 bg-gray-50';
-    }
-  };
 
   const getLevelIcon = (level: LogEntry['level']) => {
     switch (level) {
@@ -126,7 +118,7 @@ export default function ConsoleLogDisplay() {
                   <div className="break-words">{log.message}</div>
                   {log.data && (
                     <pre className="mt-1 text-xs text-gray-400 overflow-x-auto">
-                      {JSON.stringify(log.data, null, 2)}
+                      {log.data}
                     </pre>
                   )}
                 </div>
@@ -138,7 +130,7 @@ export default function ConsoleLogDisplay() {
 
       {!isExpanded && logs.length > 0 && (
         <div className="text-sm text-gray-600 mt-2">
-          {logs.length} log entries. Click "Expand" to view details.
+          {logs.length} log entries. Click &quot;Expand&quot; to view details.
         </div>
       )}
     </div>

@@ -45,7 +45,8 @@ export async function getCurrentLocation(): Promise<LocationData> {
           // If reverse geocoding fails, still return coordinates
           resolve({
             lat: latitude,
-            lng: longitude
+            lng: longitude,
+            address: undefined
           });
         }
       },

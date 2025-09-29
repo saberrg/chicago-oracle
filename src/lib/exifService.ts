@@ -1,10 +1,10 @@
 import { LocationData } from './locationService';
 
 export interface ExifData {
-  location?: LocationData;
-  dateTaken?: Date;
-  camera?: string;
-  orientation?: number;
+  location: LocationData | undefined;
+  dateTaken: Date | undefined;
+  camera: string | undefined;
+  orientation: number | undefined;
 }
 
 /**
@@ -27,7 +27,12 @@ export async function extractExifData(file: File): Promise<ExifData> {
         resolve(exifData);
       } catch (error) {
         console.warn('Failed to parse EXIF data:', error);
-        resolve({}); // Return empty object if EXIF parsing fails
+        resolve({
+          location: undefined,
+          dateTaken: undefined,
+          camera: undefined,
+          orientation: undefined
+        }); // Return empty object if EXIF parsing fails
       }
     };
     
@@ -45,7 +50,12 @@ export async function extractExifData(file: File): Promise<ExifData> {
  */
 function parseExifData(arrayBuffer: ArrayBuffer): ExifData {
   const dataView = new DataView(arrayBuffer);
-  const exifData: ExifData = {};
+  const exifData: ExifData = {
+    location: undefined,
+    dateTaken: undefined,
+    camera: undefined,
+    orientation: undefined
+  };
   
   // Look for EXIF header (0xFFE1)
   let offset = 0;

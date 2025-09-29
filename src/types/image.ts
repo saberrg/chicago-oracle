@@ -3,15 +3,15 @@ import { AddressComponents } from '@/lib/addressService';
 export interface ImageData {
   id: string;
   src: string;
-  alt?: string;
+  alt: string | undefined;
   title: string;
   createdAt: Date;
   updatedAt: Date;
-  uploadedBy?: string;
+  uploadedBy: string | undefined;
   location: {
     lat: number;
     lng: number;
-    address?: string;
+    address: string | undefined;
   };
   enhancedAddress: AddressComponents | undefined;
 }
@@ -19,11 +19,11 @@ export interface ImageData {
 export interface UploadImageData {
   file: File;
   title: string;
-  alt?: string;
+  alt: string | undefined;
   location: {
     lat: number;
     lng: number;
-    address?: string;
+    address: string | undefined;
   };
   enhancedAddress: AddressComponents | undefined;
 }

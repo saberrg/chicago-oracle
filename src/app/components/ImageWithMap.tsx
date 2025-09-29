@@ -13,7 +13,7 @@ const MapComponent = dynamic(() => import('./MapComponent'), {
 
 interface ImageWithMapProps {
   image: ImageData;
-  className?: string;
+  className: string | undefined;
 }
 
 

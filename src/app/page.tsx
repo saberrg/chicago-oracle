@@ -16,6 +16,7 @@ const mockImages: ImageData[] = [
     title: "the place",
     createdAt: new Date(),
     updatedAt: new Date(),
+    uploadedBy: undefined,
     location: { lat: 41.8781, lng: -87.6298, address: "Chicago, IL" },
     enhancedAddress: undefined
   },
@@ -26,6 +27,7 @@ const mockImages: ImageData[] = [
     title: "another place",
     createdAt: new Date(),
     updatedAt: new Date(),
+    uploadedBy: undefined,
     location: { lat: 41.8781, lng: -87.6298, address: "Chicago, IL" },
     enhancedAddress: undefined
   },
@@ -36,6 +38,7 @@ const mockImages: ImageData[] = [
     title: "somewhere else",
     createdAt: new Date(),
     updatedAt: new Date(),
+    uploadedBy: undefined,
     location: { lat: 41.8781, lng: -87.6298, address: "Chicago, IL" },
     enhancedAddress: undefined
   },

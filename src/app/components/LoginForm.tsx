@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { signIn } from '@/lib/authService';
 
 interface LoginFormProps {
-  onLoginSuccess?: () => void;
-  onLoginError?: (error: string) => void;
+  onLoginSuccess: (() => void) | undefined;
+  onLoginError: ((error: string) => void) | undefined;
 }
 
 export default function LoginForm({ onLoginSuccess, onLoginError }: LoginFormProps) {

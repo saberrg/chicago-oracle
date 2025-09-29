@@ -15,7 +15,7 @@ export interface LogEntry {
 export type CopyStatus = 'idle' | 'copying' | 'success' | 'error';
 
 export interface ConsoleLogDisplayProps {
-  readonly className?: string;
+  readonly className: string | undefined;
 }
 
 /**
@@ -29,7 +29,7 @@ export type ConsoleMethod = (...args: unknown[]) => void;
 export interface LogEntryInput {
   readonly level: LogLevel;
   readonly message: string;
-  readonly data?: unknown;
+  readonly data: unknown | undefined;
 }
 
 /**

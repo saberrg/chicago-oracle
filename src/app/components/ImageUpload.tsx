@@ -15,8 +15,8 @@ const TARGET_WIDTH = 800;
 const TARGET_HEIGHT = 1000;
 
 interface ImageUploadProps {
-  onUploadSuccess?: () => void;
-  onUploadError?: (error: string) => void;
+  onUploadSuccess: (() => void) | undefined;
+  onUploadError: ((error: string) => void) | undefined;
 }
 
 export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUploadProps) {
@@ -232,6 +232,7 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
       const uploadData: UploadImageData = {
         file: processedFile,
         title,
+        alt: undefined,
         location,
         enhancedAddress: enhancedAddress ?? undefined
       };

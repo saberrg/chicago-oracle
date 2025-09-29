@@ -3,15 +3,15 @@
  */
 
 export interface AddressComponents {
-  streetNumber?: string;
-  streetName?: string;
-  neighborhood?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  postalCode?: string;
-  formattedAddress?: string;
-  distanceFromStreet?: number | null; // in meters
+  streetNumber: string | undefined;
+  streetName: string | undefined;
+  neighborhood: string | undefined;
+  city: string | undefined;
+  state: string | undefined;
+  country: string | undefined;
+  postalCode: string | undefined;
+  formattedAddress: string | undefined;
+  distanceFromStreet: number | null | undefined; // in meters
 }
 
 interface NominatimAddress {
@@ -38,8 +38,8 @@ interface BigDataCloudResponse {
 export interface EnhancedLocationData {
   lat: number;
   lng: number;
-  address?: string;
-  enhancedAddress?: AddressComponents;
+  address: string | undefined;
+  enhancedAddress: AddressComponents | undefined;
 }
 
 /**
@@ -133,9 +133,13 @@ async function getBigDataCloudAddress(lat: number, lng: number): Promise<Address
     const data = await response.json();
     
     return {
+      streetNumber: undefined,
+      streetName: undefined,
+      neighborhood: undefined,
       city: data.locality,
       state: data.principalSubdivision,
       country: data.countryName,
+      postalCode: undefined,
       formattedAddress: formatBigDataCloudAddress(data),
       distanceFromStreet: null // BigDataCloud doesn't provide street-level data
     };

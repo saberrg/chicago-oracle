@@ -89,10 +89,11 @@ export async function uploadImage(imageData: UploadImageData): Promise<ImageData
     // Create image data object
     const newImageData: Omit<ImageData, 'id'> = {
       src: downloadURL,
-      alt: imageData.alt || '',
+      alt: imageData.alt ?? '',
       title: imageData.title,
       createdAt: new Date(),
       updatedAt: new Date(),
+      uploadedBy: undefined,
       location: imageData.location,
       enhancedAddress: imageData.enhancedAddress ?? undefined
     };

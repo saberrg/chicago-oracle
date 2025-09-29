@@ -5,7 +5,7 @@ import { ImageData } from '@/types/image';
 import { getImages, updateImageMetadata, deleteImage } from '@/lib/imageService';
 
 interface ImageListProps {
-  onUpdate?: () => void;
+  onUpdate: (() => void) | undefined;
 }
 
 export default function ImageList({ onUpdate }: ImageListProps) {

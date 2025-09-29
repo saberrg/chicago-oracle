@@ -39,7 +39,7 @@ export async function getCurrentLocation(): Promise<LocationData> {
           resolve({
             lat: latitude,
             lng: longitude,
-            address
+            address: address ?? undefined
           });
         } catch {
           // If reverse geocoding fails, still return coordinates

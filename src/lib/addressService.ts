@@ -46,6 +46,7 @@ export interface EnhancedLocationData {
  * Get enhanced address information using multiple reverse geocoding services
  */
 export async function getEnhancedAddress(lat: number, lng: number): Promise<AddressComponents | null> {
+  console.log('🏠 Starting enhanced address lookup for:', { lat, lng });
   try {
     // Try multiple services for better results
     const [nominatimResult, bigDataCloudResult] = await Promise.allSettled([
@@ -53,19 +54,27 @@ export async function getEnhancedAddress(lat: number, lng: number): Promise<Addr
       getBigDataCloudAddress(lat, lng)
     ]);
 
+    console.log('🏠 Address service results:', {
+      nominatim: nominatimResult.status,
+      bigDataCloud: bigDataCloudResult.status
+    });
+
     // Prefer Nominatim for detailed street information
     if (nominatimResult.status === 'fulfilled' && nominatimResult.value) {
+      console.log('✅ Using Nominatim address:', nominatimResult.value);
       return nominatimResult.value;
     }
 
     // Fallback to BigDataCloud
     if (bigDataCloudResult.status === 'fulfilled' && bigDataCloudResult.value) {
+      console.log('✅ Using BigDataCloud address:', bigDataCloudResult.value);
       return bigDataCloudResult.value;
     }
 
+    console.warn('⚠️ No address services returned valid data');
     return null;
   } catch (error) {
-    console.warn('Enhanced address lookup failed:', error);
+    console.error('❌ Enhanced address lookup failed:', error);
     return null;
   }
 }

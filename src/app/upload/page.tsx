@@ -5,6 +5,7 @@ import { onAuthStateChange, signOutUser } from '@/lib/authService';
 import LoginForm from '@/app/components/LoginForm';
 import ImageUpload from '@/app/components/ImageUpload';
 import ImageList from '@/app/components/ImageList';
+import ConsoleLogDisplay from '@/app/components/ConsoleLogDisplay';
 import { User } from 'firebase/auth';
 
 export default function UploadPage() {
@@ -117,6 +118,9 @@ export default function UploadPage() {
             <div className="bg-white rounded-lg shadow-md p-6">
               <ImageList onUpdate={handleUploadSuccess} />
             </div>
+            
+            {/* Console Logs Display */}
+            <ConsoleLogDisplay />
           </div>
         )}
       </main>

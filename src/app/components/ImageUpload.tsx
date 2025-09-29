@@ -135,12 +135,21 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
+      console.log('📁 File selected:', {
+        name: selectedFile.name,
+        size: selectedFile.size,
+        type: selectedFile.type,
+        lastModified: selectedFile.lastModified
+      });
+      
       setFile(selectedFile);
       
       try {
+        console.log('🖼️ Processing image for display...');
         // Process the image to fit the target aspect ratio
         const processed = await processImageForDisplay(selectedFile);
         setProcessedFile(processed);
+        console.log('✅ Image processed successfully');
         
         // Create preview from processed image
         const reader = new FileReader();
@@ -150,23 +159,26 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
         reader.readAsDataURL(processed);
         
       } catch (error: unknown) {
-        console.error('Failed to process image:', error);
+        console.error('❌ Failed to process image:', error);
         onUploadError?.('Failed to process image. Please try a different image.');
         return;
       }
       
       // Automatically try to get location from EXIF data or current location
       try {
+        console.log('📍 Attempting to get location from file...');
         setLocationLoading(true);
         const fileLocation = await getLocationFromFile(selectedFile, getCurrentLocation);
+        console.log('📍 Location obtained:', fileLocation);
         setLocation(fileLocation);
         
         // Get enhanced address data if location was found
         if (fileLocation.lat && fileLocation.lng) {
+          console.log('🏠 Getting enhanced address data...');
           await getEnhancedAddressData(fileLocation.lat, fileLocation.lng);
         }
       } catch (error: unknown) {
-        console.warn('Failed to get location:', error);
+        console.warn('⚠️ Failed to get location:', error);
         // Don't show error to user, just log it
       } finally {
         setLocationLoading(false);
@@ -175,17 +187,20 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
   };
 
   const handleGetLocation = async () => {
+    console.log('📍 Manual location request initiated...');
     setLocationLoading(true);
     try {
       const currentLocation = await getCurrentLocation();
+      console.log('📍 Current location obtained:', currentLocation);
       setLocation(currentLocation);
       
       // Get enhanced address data
       if (currentLocation.lat && currentLocation.lng) {
+        console.log('🏠 Getting enhanced address for current location...');
         await getEnhancedAddressData(currentLocation.lat, currentLocation.lng);
       }
     } catch (error: unknown) {
-      console.error('Location error:', error);
+      console.error('❌ Location error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to get location';
       onUploadError?.(errorMessage);
     } finally {
@@ -196,11 +211,22 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('🚀 Upload form submission started');
+    console.log('📋 Form validation:', {
+      hasFile: !!processedFile,
+      hasTitle: !!title,
+      hasLocation: !!location,
+      title: title,
+      location: location
+    });
+    
     if (!processedFile || !title || !location) {
+      console.error('❌ Form validation failed - missing required fields');
       onUploadError?.('Please fill in all fields and get your location');
       return;
     }
 
+    console.log('✅ Form validation passed, starting upload...');
     setLoading(true);
     try {
       const uploadData: UploadImageData = {
@@ -210,7 +236,17 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
         enhancedAddress: enhancedAddress || undefined
       };
 
+      console.log('📤 Upload data prepared:', {
+        title: uploadData.title,
+        location: uploadData.location,
+        hasEnhancedAddress: !!uploadData.enhancedAddress,
+        fileSize: uploadData.file.size,
+        fileName: uploadData.file.name
+      });
+
+      console.log('☁️ Uploading to Firebase...');
       await uploadImage(uploadData);
+      console.log('✅ Upload successful!');
       
       // Reset form
       setFile(null);
@@ -225,7 +261,7 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
       
       onUploadSuccess?.();
     } catch (error: unknown) {
-      console.error('Upload error:', error);
+      console.error('❌ Upload error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload image';
       onUploadError?.(errorMessage);
     } finally {

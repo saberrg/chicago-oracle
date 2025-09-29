@@ -58,20 +58,33 @@ export async function migrateImageEnhancedAddress(imageId: string, lat: number, 
  * Upload an image to Firebase Storage and save metadata to Firestore
  */
 export async function uploadImage(imageData: UploadImageData): Promise<ImageData> {
+  console.log('☁️ Starting image upload to Firebase...');
   try {
     // Create a unique filename
     const timestamp = Date.now();
     const fileExtension = imageData.file.name.split('.').pop();
     const fileName = `${timestamp}_${Math.random().toString(36).substring(2)}.${fileExtension}`;
     
+    console.log('📁 File details:', {
+      originalName: imageData.file.name,
+      generatedName: fileName,
+      size: imageData.file.size,
+      type: imageData.file.type
+    });
+    
     // Create storage reference
     const storageRef = ref(storage, `${STORAGE_FOLDER}/${fileName}`);
+    console.log('📂 Storage path:', `${STORAGE_FOLDER}/${fileName}`);
     
     // Upload file to Firebase Storage
+    console.log('⬆️ Uploading file to Firebase Storage...');
     const uploadResult = await uploadBytes(storageRef, imageData.file);
+    console.log('✅ File uploaded to Storage successfully');
     
     // Get download URL
+    console.log('🔗 Getting download URL...');
     const downloadURL = await getDownloadURL(uploadResult.ref);
+    console.log('✅ Download URL obtained:', downloadURL);
     
     // Create image data object
     const newImageData: Omit<ImageData, 'id'> = {
@@ -84,15 +97,23 @@ export async function uploadImage(imageData: UploadImageData): Promise<ImageData
       enhancedAddress: imageData.enhancedAddress
     };
     
+    console.log('💾 Saving metadata to Firestore...', {
+      title: newImageData.title,
+      hasLocation: !!newImageData.location,
+      hasEnhancedAddress: !!newImageData.enhancedAddress,
+      location: newImageData.location
+    });
+    
     // Save metadata to Firestore
     const docRef = await addDoc(collection(db, IMAGES_COLLECTION), newImageData);
+    console.log('✅ Metadata saved to Firestore with ID:', docRef.id);
     
     return {
       id: docRef.id,
       ...newImageData
     };
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error('❌ Error uploading image:', error);
     throw new Error('Failed to upload image');
   }
 }

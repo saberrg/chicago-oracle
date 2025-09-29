@@ -1,7 +1,7 @@
 export interface LocationData {
   lat: number;
   lng: number;
-  address?: string;
+  address: string | undefined;
 }
 
 export interface LocationError {

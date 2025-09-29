@@ -195,7 +195,7 @@ function formatBigDataCloudAddress(data: BigDataCloudResponse): string {
 /**
  * Calculate approximate distance from nearest street (rough estimation)
  */
-function calculateDistanceFromStreet(lat: number, lng: number, address: NominatimAddress): number | null {
+function calculateDistanceFromStreet(_lat: number, _lng: number, address: NominatimAddress): number | null {
   // This is a simplified calculation - in a real app you might want to use
   // a more sophisticated approach with actual street data
   if (!address.road && !address.pedestrian && !address.footway) {

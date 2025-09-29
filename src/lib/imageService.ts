@@ -94,7 +94,7 @@ export async function uploadImage(imageData: UploadImageData): Promise<ImageData
       createdAt: new Date(),
       updatedAt: new Date(),
       location: imageData.location,
-      enhancedAddress: imageData.enhancedAddress
+      enhancedAddress: imageData.enhancedAddress ?? undefined
     };
     
     console.log('💾 Saving metadata to Firestore...', {
@@ -124,7 +124,7 @@ export async function uploadImage(imageData: UploadImageData): Promise<ImageData
 export async function getImages(
   pageSize: number = 10, 
   lastDoc?: DocumentSnapshot
-): Promise<{ images: ImageData[]; lastDoc?: DocumentSnapshot }> {
+): Promise<{ images: ImageData[]; lastDoc: DocumentSnapshot | undefined }> {
   try {
     let q = query(
       collection(db, IMAGES_COLLECTION),
@@ -238,7 +238,7 @@ export async function deleteImage(id: string): Promise<void> {
     }
     
     // Decode the path (Firebase Storage URLs are URL-encoded)
-    const fullPath = decodeURIComponent(pathMatch[1]);
+    const fullPath = decodeURIComponent(pathMatch[1]!);
     
     // Delete from Storage
     const storageRef = ref(storage, fullPath);

@@ -16,7 +16,8 @@ const mockImages: ImageData[] = [
     title: "the place",
     createdAt: new Date(),
     updatedAt: new Date(),
-    location: { lat: 41.8781, lng: -87.6298, address: "Chicago, IL" }
+    location: { lat: 41.8781, lng: -87.6298, address: "Chicago, IL" },
+    enhancedAddress: undefined
   },
   { 
     id: "2", 
@@ -25,7 +26,8 @@ const mockImages: ImageData[] = [
     title: "another place",
     createdAt: new Date(),
     updatedAt: new Date(),
-    location: { lat: 41.8781, lng: -87.6298, address: "Chicago, IL" }
+    location: { lat: 41.8781, lng: -87.6298, address: "Chicago, IL" },
+    enhancedAddress: undefined
   },
   { 
     id: "3", 
@@ -34,7 +36,8 @@ const mockImages: ImageData[] = [
     title: "somewhere else",
     createdAt: new Date(),
     updatedAt: new Date(),
-    location: { lat: 41.8781, lng: -87.6298, address: "Chicago, IL" }
+    location: { lat: 41.8781, lng: -87.6298, address: "Chicago, IL" },
+    enhancedAddress: undefined
   },
 ];
 
@@ -87,7 +90,7 @@ export default function Home() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       async (entries) => {
-        if (entries[0].isIntersecting && !loading && !initialLoading && hasMore) {
+        if (entries[0]?.isIntersecting && !loading && !initialLoading && hasMore) {
           setLoading(true);
           try {
             const { images: moreImages, lastDoc: newLastDoc } = await getImages(10, lastDoc);

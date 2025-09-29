@@ -13,7 +13,7 @@ export interface ImageData {
     lng: number;
     address?: string;
   };
-  enhancedAddress?: AddressComponents;
+  enhancedAddress: AddressComponents | undefined;
 }
 
 export interface UploadImageData {
@@ -25,5 +25,5 @@ export interface UploadImageData {
     lng: number;
     address?: string;
   };
-  enhancedAddress?: AddressComponents;
+  enhancedAddress: AddressComponents | undefined;
 }

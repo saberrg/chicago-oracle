@@ -233,7 +233,7 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
         file: processedFile,
         title,
         location,
-        enhancedAddress: enhancedAddress || undefined
+        enhancedAddress: enhancedAddress ?? undefined
       };
 
       console.log('📤 Upload data prepared:', {

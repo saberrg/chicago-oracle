@@ -1,18 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-interface LogEntry {
-  id: string;
-  timestamp: Date;
-  level: 'log' | 'warn' | 'error' | 'info';
-  message: string;
-  data?: string;
-}
+import { LogEntry, LogLevel, CopyStatus, ConsoleMethod, safeStringify } from '@/types/console';
 
 export default function ConsoleLogDisplay() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle');
 
   useEffect(() => {
     // Store original console methods
@@ -22,41 +16,34 @@ export default function ConsoleLogDisplay() {
     const originalInfo = console.info;
 
     // Override console methods to capture logs
-    const addLog = (level: LogEntry['level'], args: unknown[]) => {
+    const addLog = (level: LogLevel, args: unknown[]): void => {
       const message = args.map(arg => 
-        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+        typeof arg === 'object' && arg !== null ? safeStringify(arg) : String(arg)
       ).join(' ');
       
+      const data = args.length > 1 ? safeStringify(args.slice(1)) : undefined;
       const logEntry: LogEntry = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         timestamp: new Date(),
         level,
         message,
-        data: args.length > 1 ? JSON.stringify(args.slice(1), null, 2) : undefined
+        data
       };
 
       setLogs(prev => [...prev.slice(-49), logEntry]); // Keep last 50 logs
     };
 
-    console.log = (...args) => {
-      originalLog(...args);
-      addLog('log', args);
+    const overrideConsole = (original: ConsoleMethod, level: LogLevel): ConsoleMethod => {
+      return (...args: unknown[]) => {
+        original(...args);
+        addLog(level, args);
+      };
     };
 
-    console.warn = (...args) => {
-      originalWarn(...args);
-      addLog('warn', args);
-    };
-
-    console.error = (...args) => {
-      originalError(...args);
-      addLog('error', args);
-    };
-
-    console.info = (...args) => {
-      originalInfo(...args);
-      addLog('info', args);
-    };
+    console.log = overrideConsole(originalLog, 'log');
+    console.warn = overrideConsole(originalWarn, 'warn');
+    console.error = overrideConsole(originalError, 'error');
+    console.info = overrideConsole(originalInfo, 'info');
 
     // Cleanup function to restore original console methods
     return () => {
@@ -71,8 +58,31 @@ export default function ConsoleLogDisplay() {
     setLogs([]);
   };
 
+  const copyLogsToClipboard = async () => {
+    if (logs.length === 0) return;
+    
+    setCopyStatus('copying');
+    try {
+      const logsText = logs.map(log => {
+        const timestamp = log.timestamp.toLocaleString();
+        const level = log.level.toUpperCase();
+        const icon = getLevelIcon(log.level);
+        const dataSection = log.data ? `\n  Data: ${log.data}` : '';
+        return `[${timestamp}] ${icon} ${level}: ${log.message}${dataSection}`;
+      }).join('\n\n');
+      
+      await navigator.clipboard.writeText(logsText);
+      setCopyStatus('success');
+      setTimeout(() => setCopyStatus('idle'), 2000);
+    } catch (error) {
+      console.error('Failed to copy logs:', error);
+      setCopyStatus('error');
+      setTimeout(() => setCopyStatus('idle'), 2000);
+    }
+  };
 
-  const getLevelIcon = (level: LogEntry['level']) => {
+
+  const getLevelIcon = (level: LogLevel): string => {
     switch (level) {
       case 'error': return '❌';
       case 'warn': return '⚠️';
@@ -86,6 +96,15 @@ export default function ConsoleLogDisplay() {
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-800">Console Logs</h3>
         <div className="flex gap-2">
+          <button
+            onClick={copyLogsToClipboard}
+            disabled={logs.length === 0 || copyStatus === 'copying'}
+            className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {copyStatus === 'copying' ? 'Copying...' : 
+             copyStatus === 'success' ? 'Copied!' : 
+             copyStatus === 'error' ? 'Failed' : 'Copy Logs'}
+          </button>
           <button
             onClick={clearLogs}
             className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"

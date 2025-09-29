@@ -6,7 +6,9 @@
     "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next dev --turbopack",
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint . --ext .ts,.tsx --fix",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch"
   },
   "dependencies": {
     "@types/leaflet": "^1.9.20",

@@ -1,0 +1,101 @@
+# Chicago Oracle - AI Assistant Rules
+
+## 🚨 MANDATORY TYPESCRIPT RULES
+
+**CRITICAL**: This project uses TypeScript strict mode with `exactOptionalPropertyTypes: true`. You MUST follow these rules for ALL code changes:
+
+### 1. NEVER Use Optional Properties (?)
+```typescript
+// ❌ FORBIDDEN
+interface Bad {
+  name?: string;
+}
+
+// ✅ REQUIRED
+interface Good {
+  name: string | undefined;
+}
+```
+
+### 2. Always Use Nullish Coalescing (??)
+```typescript
+// ❌ FORBIDDEN
+value || undefined
+value || ''
+
+// ✅ REQUIRED
+value ?? undefined
+value ?? ''
+```
+
+### 3. All Object Properties Must Be Explicit
+```typescript
+// ❌ FORBIDDEN - Missing uploadedBy
+const image: ImageData = {
+  id: "1",
+  src: "url",
+  // ... other props
+  enhancedAddress: undefined
+  // Missing uploadedBy!
+};
+
+// ✅ REQUIRED - All properties present
+const image: ImageData = {
+  id: "1",
+  src: "url",
+  // ... other props
+  uploadedBy: undefined,
+  enhancedAddress: undefined
+};
+```
+
+### 4. Component Props Pattern
+```typescript
+// ❌ FORBIDDEN
+interface Props {
+  onClick?: () => void;
+}
+
+// ✅ REQUIRED
+interface Props {
+  onClick: (() => void) | undefined;
+}
+```
+
+## 📚 PROJECT INTERFACES
+
+### Core Types You'll Use:
+
+**ImageData** (src/types/image.ts):
+- All properties required (use `| undefined` for optional values)
+- Must include: `uploadedBy`, `alt`, `location.address`, `enhancedAddress`
+
+**LocationData** (src/lib/locationService.ts):
+- Must include: `lat`, `lng`, `address: string | undefined`
+
+**AddressComponents** (src/lib/addressService.ts):
+- All 9 properties required with `| undefined`
+- When creating, provide ALL properties even if undefined
+
+**ExifData** (src/lib/exifService.ts):
+- All 4 properties required: `location`, `dateTaken`, `camera`, `orientation`
+
+## ✅ BEFORE MAKING CHANGES
+
+1. Read `TYPESCRIPT_RULES.md` for complete guidelines
+2. Check existing interfaces for the exact pattern
+3. Ensure ALL properties are provided in object literals
+4. Use `?? undefined` not `|| undefined`
+5. Never use `property?: type` syntax
+
+## 🔍 VERIFICATION
+
+Before completing any task:
+- Run `npm run type-check` 
+- Must show zero errors
+- If errors appear, fix them immediately using patterns from TYPESCRIPT_RULES.md
+
+## 📖 REFERENCE
+
+Full rules: See `TYPESCRIPT_RULES.md`
+Quick reference table: Bottom of TYPESCRIPT_RULES.md

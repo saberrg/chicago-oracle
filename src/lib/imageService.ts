@@ -26,6 +26,32 @@ const IMAGES_COLLECTION = 'images';
 const STORAGE_FOLDER = 'images';
 
 /**
+ * Remove undefined values from an object for Firebase compatibility
+ * Firebase Firestore doesn't accept undefined values, so we need to filter them out
+ * while keeping TypeScript types strict with explicit undefined
+ */
+function removeUndefinedFields<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  const result: Partial<T> = {};
+  
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const value = obj[key];
+      
+      if (value !== undefined) {
+        // Recursively handle nested objects
+        if (value !== null && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
+          result[key] = removeUndefinedFields(value as Record<string, unknown>) as T[Extract<keyof T, string>];
+        } else {
+          result[key] = value as T[Extract<keyof T, string>];
+        }
+      }
+    }
+  }
+  
+  return result;
+}
+
+/**
  * Migrate an image to include enhanced address data if missing
  * This function will be called automatically when loading images without enhanced address
  */
@@ -105,8 +131,11 @@ export async function uploadImage(imageData: UploadImageData): Promise<ImageData
       location: newImageData.location
     });
     
+    // Remove undefined fields for Firebase compatibility
+    const firestoreData = removeUndefinedFields(newImageData);
+    
     // Save metadata to Firestore
-    const docRef = await addDoc(collection(db, IMAGES_COLLECTION), newImageData);
+    const docRef = await addDoc(collection(db, IMAGES_COLLECTION), firestoreData);
     console.log('✅ Metadata saved to Firestore with ID:', docRef.id);
     
     return {
@@ -263,10 +292,14 @@ export async function updateImageMetadata(
 ): Promise<void> {
   try {
     const docRef = doc(db, IMAGES_COLLECTION, id);
-    await updateDoc(docRef, {
+    
+    // Remove undefined fields for Firebase compatibility
+    const firestoreUpdates = removeUndefinedFields({
       ...updates,
       updatedAt: new Date()
     });
+    
+    await updateDoc(docRef, firestoreUpdates);
   } catch (error) {
     console.error('Error updating image:', error);
     throw new Error('Failed to update image');

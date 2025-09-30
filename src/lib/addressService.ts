@@ -101,15 +101,15 @@ async function getNominatimAddress(lat: number, lng: number): Promise<AddressCom
     const address = data.address;
     
     return {
-      streetNumber: address.house_number,
-      streetName: address.road || address.pedestrian || address.footway,
-      neighborhood: address.neighbourhood || address.suburb,
-      city: address.city || address.town || address.village,
-      state: address.state,
-      country: address.country,
-      postalCode: address.postcode,
+      streetNumber: address.house_number ?? undefined,
+      streetName: address.road ?? address.pedestrian ?? address.footway ?? undefined,
+      neighborhood: address.neighbourhood ?? address.suburb ?? undefined,
+      city: address.city ?? address.town ?? address.village ?? undefined,
+      state: address.state ?? undefined,
+      country: address.country ?? undefined,
+      postalCode: address.postcode ?? undefined,
       formattedAddress: formatNominatimAddress(address),
-      distanceFromStreet: calculateDistanceFromStreet(lat, lng, address)
+      distanceFromStreet: calculateDistanceFromStreet(lat, lng, address) ?? undefined
     };
   } catch (error) {
     console.warn('Nominatim geocoding failed:', error);
@@ -156,20 +156,23 @@ function formatNominatimAddress(address: NominatimAddress): string {
   const parts = [];
   
   // Try to build a street address first
-  if (address.house_number && (address.road || address.pedestrian || address.footway)) {
-    parts.push(`${address.house_number} ${address.road || address.pedestrian || address.footway}`);
-  } else if (address.road || address.pedestrian || address.footway) {
-    parts.push(address.road || address.pedestrian || address.footway);
+  const street = address.road ?? address.pedestrian ?? address.footway;
+  if (address.house_number && street) {
+    parts.push(`${address.house_number} ${street}`);
+  } else if (street) {
+    parts.push(street);
   }
   
   // Add neighborhood/suburb
-  if (address.neighbourhood || address.suburb) {
-    parts.push(address.neighbourhood || address.suburb);
+  const neighborhood = address.neighbourhood ?? address.suburb;
+  if (neighborhood) {
+    parts.push(neighborhood);
   }
   
   // Add city
-  if (address.city || address.town || address.village) {
-    parts.push(address.city || address.town || address.village);
+  const city = address.city ?? address.town ?? address.village;
+  if (city) {
+    parts.push(city);
   }
   
   // Add state
@@ -216,7 +219,7 @@ function calculateDistanceFromStreet(_lat: number, _lng: number, address: Nomina
  */
 export function getDisplayAddress(enhancedAddress: AddressComponents | null, fallbackAddress?: string): string {
   if (!enhancedAddress) {
-    return fallbackAddress || 'Location unknown';
+    return fallbackAddress ?? 'Location unknown';
   }
 
   // If we have a street address, use it
@@ -240,7 +243,7 @@ export function getDisplayAddress(enhancedAddress: AddressComponents | null, fal
   }
   
   // Last resort
-  return enhancedAddress.formattedAddress || fallbackAddress || 'Location unknown';
+  return enhancedAddress.formattedAddress ?? fallbackAddress ?? 'Location unknown';
 }
 
 /**
@@ -248,7 +251,7 @@ export function getDisplayAddress(enhancedAddress: AddressComponents | null, fal
  */
 export function getDescriptiveLocation(enhancedAddress: AddressComponents | null, fallbackAddress?: string): string {
   if (!enhancedAddress) {
-    return fallbackAddress || 'Location unknown';
+    return fallbackAddress ?? 'Location unknown';
   }
 
   const parts = [];
@@ -280,5 +283,5 @@ export function getDescriptiveLocation(enhancedAddress: AddressComponents | null
     return enhancedAddress.formattedAddress;
   }
   
-  return parts.length > 0 ? parts.join(', ') : (fallbackAddress || 'Location unknown');
+  return parts.length > 0 ? parts.join(', ') : (fallbackAddress ?? 'Location unknown');
 }

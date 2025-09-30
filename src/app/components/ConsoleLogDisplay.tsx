@@ -21,13 +21,12 @@ export default function ConsoleLogDisplay() {
         typeof arg === 'object' && arg !== null ? safeStringify(arg) : String(arg)
       ).join(' ');
       
-      const data = args.length > 1 ? safeStringify(args.slice(1)) : undefined;
       const logEntry: LogEntry = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         timestamp: new Date(),
         level,
         message,
-        data
+        data: undefined
       };
 
       setLogs(prev => [...prev.slice(-49), logEntry]); // Keep last 50 logs

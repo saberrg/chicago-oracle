@@ -9,18 +9,7 @@ interface ImageCardProps {
 export default function ImageCard({ image }: ImageCardProps) {
   // Use the stored enhanced address data directly from the image object
   // If enhanced address is missing, the migration will be triggered automatically in the background
-  const displayAddress = getDescriptiveLocation(image.enhancedAddress || null, image.location.address);
-  
-  // Console log for debugging
-  console.log('ImageCard - Full image object:', image);
-  console.log('ImageCard - Location data:', image.location);
-  console.log('ImageCard - Enhanced address:', image.enhancedAddress);
-  console.log('ImageCard - Display address:', displayAddress);
-  
-  // Log if migration is needed (for debugging)
-  if (!image.enhancedAddress && image.location?.lat && image.location?.lng) {
-    console.log(`ImageCard - Migration needed for image ${image.id}, will be handled automatically`);
-  }
+  const displayAddress = getDescriptiveLocation(image.enhancedAddress ?? null, image.location.address);
   
   return (
     <div className="mb-8">

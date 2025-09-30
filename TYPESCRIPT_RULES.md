@@ -1,4 +1,6 @@
-# TypeScript Strict Mode Rules
+# TypeScript Strict Mode Rules - Chicago Oracle Project
+
+> **⚠️ MANDATORY**: These rules MUST be followed for all code in this project. All AI assistants and developers must adhere to these guidelines.
 
 ## 🚨 CRITICAL RULES TO PREVENT COMPILATION ERRORS
 
@@ -165,3 +167,152 @@ And to your `.eslintrc.json`:
   }
 }
 ```
+
+## 📚 PROJECT-SPECIFIC PATTERNS
+
+### **Chicago Oracle Standard Interfaces**
+
+All interfaces in this project follow strict undefined handling:
+
+```typescript
+// Image Types (src/types/image.ts)
+export interface ImageData {
+  id: string;
+  src: string;
+  alt: string | undefined;                    // ✅ Explicit undefined
+  title: string;
+  createdAt: Date;
+  updatedAt: Date;
+  uploadedBy: string | undefined;             // ✅ Explicit undefined
+  location: {
+    lat: number;
+    lng: number;
+    address: string | undefined;              // ✅ Explicit undefined
+  };
+  enhancedAddress: AddressComponents | undefined;
+}
+
+// Address Types (src/lib/addressService.ts)
+export interface AddressComponents {
+  streetNumber: string | undefined;           // ✅ All properties explicit
+  streetName: string | undefined;
+  neighborhood: string | undefined;
+  city: string | undefined;
+  state: string | undefined;
+  country: string | undefined;
+  postalCode: string | undefined;
+  formattedAddress: string | undefined;
+  distanceFromStreet: number | null | undefined;
+}
+
+// Location Types (src/lib/locationService.ts)
+export interface LocationData {
+  lat: number;
+  lng: number;
+  address: string | undefined;               // ✅ Explicit undefined
+}
+
+// Component Props
+interface ImageUploadProps {
+  onUploadSuccess: (() => void) | undefined;  // ✅ Function or undefined
+  onUploadError: ((error: string) => void) | undefined;
+}
+```
+
+### **Object Creation Patterns**
+
+Always provide all required properties, even if they're undefined:
+
+```typescript
+// ✅ CORRECT - Mock data creation
+const mockImage: ImageData = {
+  id: "1",
+  src: "https://example.com/image.jpg",
+  alt: "Sample image",
+  title: "Image Title",
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  uploadedBy: undefined,                     // ✅ Explicitly set
+  location: {
+    lat: 41.8781,
+    lng: -87.6298,
+    address: "Chicago, IL"
+  },
+  enhancedAddress: undefined                 // ✅ Explicitly set
+};
+
+// ✅ CORRECT - Upload data creation
+const uploadData: UploadImageData = {
+  file: processedFile,
+  title,
+  alt: undefined,                            // ✅ Explicitly set
+  location,
+  enhancedAddress: enhancedAddress ?? undefined
+};
+
+// ✅ CORRECT - ExifData initialization
+const exifData: ExifData = {
+  location: undefined,
+  dateTaken: undefined,
+  camera: undefined,
+  orientation: undefined
+};
+```
+
+### **Nullish Coalescing Usage**
+
+Always use `??` instead of `||` for undefined handling:
+
+```typescript
+// ✅ CORRECT
+alt: imageData.alt ?? ''
+address: address ?? undefined
+enhancedAddress: data.enhancedAddress ?? undefined
+
+// ❌ WRONG
+alt: imageData.alt || ''              // Don't use ||
+address: address || undefined         // Don't use ||
+```
+
+### **Component Props with Optional Callbacks**
+
+```typescript
+// ✅ CORRECT - Interface definition
+interface ComponentProps {
+  onSuccess: (() => void) | undefined;
+  onError: ((error: string) => void) | undefined;
+}
+
+// ✅ CORRECT - Usage in component
+export default function Component({ onSuccess, onError }: ComponentProps) {
+  // Use optional chaining when calling
+  onSuccess?.();
+  onError?.('Error message');
+}
+
+// ✅ CORRECT - When passing props
+<Component onSuccess={undefined} onError={undefined} />
+```
+
+## 🎯 ENFORCEMENT
+
+1. **Before every commit**: Run `npm run type-check` - must pass with zero errors
+2. **Code reviews**: Verify all interfaces follow explicit undefined pattern
+3. **New code**: Always check against this document before writing
+4. **AI assistants**: Must reference this document when making any TypeScript changes
+
+## ⚡ QUICK REFERENCE
+
+| Pattern | ❌ Wrong | ✅ Correct |
+|---------|----------|-----------|
+| Optional property | `name?: string` | `name: string \| undefined` |
+| Nullish coalescing | `value \|\| undefined` | `value ?? undefined` |
+| Empty string fallback | `val \|\| ''` | `val ?? ''` |
+| Object creation | Missing properties | All properties explicit |
+| Function props | `onClick?: () => void` | `onClick: (() => void) \| undefined` |
+| Array access | `arr[0].prop` | `arr[0]?.prop` |
+
+---
+
+**Last Updated**: Project-wide refactor completed - All files now comply with strict mode
+**Status**: ✅ All TypeScript checks passing with zero errors

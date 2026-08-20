@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import { uploadImage } from '@/lib/imageService';
 import { getCurrentLocation, LocationData } from '@/lib/locationService';
 import { getLocationFromFile } from '@/lib/exifService';
 import { getEnhancedAddress, AddressComponents } from '@/lib/addressService';
 import { UploadImageData } from '@/types/image';
-import { getCurrentUser } from '@/lib/authService';
+import { getCurrentUser, onAuthStateChange } from '@/lib/authService';
 
 // Target aspect ratio for consistent display (4:5 like Instagram)
 const TARGET_ASPECT_RATIO = 4 / 5;
@@ -28,13 +28,12 @@ export default function ImageUpload({ onUploadSuccess, onUploadError }: ImageUpl
   const [loading, setLoading] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const isAuthenticated = useSyncExternalStore(
+    onAuthStateChange,
+    getCurrentUser,
+    () => null
+  ) !== null;
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const user = getCurrentUser();
-    setIsAuthenticated(!!user);
-  }, []);
 
   /**
    * Get enhanced address data when location coordinates are available

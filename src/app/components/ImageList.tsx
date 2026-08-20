@@ -1,11 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useCallback, useEffect, useState } from 'react';
 import { ImageData } from '@/types/image';
 import { getImages, updateImageMetadata, deleteImage } from '@/lib/imageService';
 
 interface ImageListProps {
   onUpdate: (() => void) | undefined;
+}
+
+async function fetchImages(): Promise<ImageData[]> {
+  const result = await getImages(50);
+  return result.images;
 }
 
 export default function ImageList({ onUpdate }: ImageListProps) {
@@ -15,23 +21,46 @@ export default function ImageList({ onUpdate }: ImageListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
 
-  useEffect(() => {
-    loadImages();
-  }, []);
-
-  const loadImages = async () => {
+  const loadImages = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const result = await getImages(50); // Get up to 50 images
-      setImages(result.images);
+      setImages(await fetchImages());
     } catch (err: unknown) {
       setError('Failed to load images');
       console.error('Error loading images:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadInitialImages = async () => {
+      try {
+        const initialImages = await fetchImages();
+        if (!cancelled) {
+          setImages(initialImages);
+        }
+      } catch (error: unknown) {
+        if (!cancelled) {
+          setError('Failed to load images');
+          console.error('Error loading images:', error);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadInitialImages();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleEditStart = (image: ImageData) => {
     setEditingId(image.id);
@@ -117,9 +146,11 @@ export default function ImageList({ onUpdate }: ImageListProps) {
           <div key={image.id} className="bg-white rounded-lg shadow-md overflow-hidden">
             {/* Image */}
             <div className="aspect-square relative">
-              <img
+              <Image
                 src={image.src}
                 alt={image.alt || image.title}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="w-full h-full object-cover"
               />
             </div>
